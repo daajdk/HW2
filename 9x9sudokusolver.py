@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-# DAA HW1
+# DAA HW2
 # Mini Sudoku Brute Force Solver with backtracking
 # Python version
 # Kevin McCarthy, Jen Senior, Dan Wegmann
-# 26 Sep 2013
+# 12 Oct 2013
 # Prof. Baliga
 
 #sys module imported for parsing input file from args
@@ -215,11 +215,11 @@ class Sudoku:
         self.size = 0
         self.solvedPuzzle = []
         self.isSolved = False
-                         
+    
+    #checks to see if the row has all 6 proper digits
+    #vars set to false until it's corresponding digit 
+    #is found in the row passed as arg                     
     def checkRow(self, row, Puzzle):
-        #checks to see if the row has all 6 proper digits
-        #vars set to false until it's corresponding digit 
-        #is found in the row passed as arg
         a = []
         for i in range(0,self.size):
             a.append(Puzzle[row][i])
@@ -228,9 +228,9 @@ class Sudoku:
                 return False
         return True 
 
+    #checks to see if the column has all 6 proper digits
+    #same concept as checkRow in with obvious difference
     def checkCol(self, col, Puzzle):
-	    #checks to see if the column has all 6 proper digits
-        #same concept as checkRow in with obvious difference
         a = []
         for i in range(0,self.size):
             a.append(Puzzle[i][col])
@@ -238,7 +238,8 @@ class Sudoku:
             if i not in a:
                 return False
         return True    
-	
+    
+    #do final check on puzzle to see if solved yet
     def finalCheck(self, Puzzle):
         rowStatus = True
         colStatus = True
@@ -251,7 +252,8 @@ class Sudoku:
             return True
         else:
             return False        
-
+    
+    #build the unsolved puzzle matrix from the given input
     def buildPuzzle(self, f):
         a = []
         row = 0
@@ -277,7 +279,8 @@ class Sudoku:
                     col+=1
             break
         return a
-        
+    
+    #build the set of EmptyCells objects and return it
     def buildEmptyCells(self, obj, Puzzle):
         a = []
         for i in range(0,obj.size):
@@ -286,11 +289,14 @@ class Sudoku:
                     ec = EmptyCell(i,j)
                     a.append(ec)
         return a
-                    
+    
+    #get file descriptor for input, and open in append mode
+    #to leave initial unsolved puzzle data in file after solving
     def getFile(self):
         data = sys.argv[1]
         return open(data, 'a+')
-     
+    
+    #append solution output to input file
     def writeToFile(self, f, Puzzle, end_time):
         if(self.isSolved):
             f.write("\n***********SOLUTION***********\n")
@@ -299,8 +305,11 @@ class Sudoku:
                     f.write(str(j))
             f.write("\nTotal Runtime in seconds: "+str(end_time))
         f.close()
-
+    
+    #function to begin solving the puzzle which is the root of the
+    #recursive call tree
     def solve(self):
+        start_time = time.time()
         f = self.getFile()
         obj = self
         Puzzle = self.buildPuzzle(f)
@@ -310,16 +319,17 @@ class Sudoku:
             i.getColNums(obj, Puzzle)
             i.getBoxNums(obj, Puzzle)
             i.availCell(obj)
-        start_time = time.time()
         self.reck(EmptyCells, 0, obj, Puzzle)
         end_time = time.time()-start_time
         if(self.isSolved):
-            print "\n***************\nSuccess!!!\n",self.x,"\n***************"
+            print "\n***************\nSuccess!!!\n",self.solvedPuzzle,"\n***************"
             print"\nTotal Runtime in seconds: ", end_time
-            self.writeToFile(f, self.x, end_time)
+            self.writeToFile(f, self.solvedPuzzle, end_time)
         else:
             print"NOT SOLVED!"
-            
+    
+    #recursive function which uses copies of the puzzle passed to it as the
+    #backtracking method
     def reck(self, EmptyCells, placer, obj, Puzzle):
         index = placer
         for i in EmptyCells[index].possSol:
@@ -329,7 +339,7 @@ class Sudoku:
                     a[EmptyCells[index].coord[0]][EmptyCells[index].coord[1]] = i
                     if(self.finalCheck(a)):
                         obj.isSolved = True
-                        obj.x = copy.deepcopy(a)
+                        obj.solvedPuzzle = copy.deepcopy(a)
                         return
                     elif(index < len(EmptyCells)-1 and not obj.isSolved):
                         self.reck(EmptyCells,index+1,obj, a)
