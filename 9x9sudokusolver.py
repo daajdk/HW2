@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # DAA HW2
-# Mini Sudoku Brute Force Solver with backtracking
+# Sudoku Brute Force Solver with backtracking
 # Python version
 # Kevin McCarthy, Jen Senior, Dan Wegmann
-# 12 Oct 2013
+# 15 Oct 2013
 # Prof. Baliga
 
 #sys module imported for parsing input file from args
@@ -209,7 +209,7 @@ class EmptyCell:
             return False
             
 
-#MiniSudoku class to contain functions related to solving the Mini Sudoku puzzle
+#Sudoku class to contain functions related to solving the Mini Sudoku puzzle
 class Sudoku:
     def __init__(self):
         self.size = 0
@@ -303,7 +303,7 @@ class Sudoku:
             for i in Puzzle:
                 for j in i:
                     f.write(str(j))
-            f.write("\nTotal Runtime in seconds: "+str(end_time))
+            f.write("\nTotal Runtime in seconds: "+str(end_time)+"\n")
         f.close()
     
     #function to begin solving the puzzle which is the root of the
@@ -333,16 +333,19 @@ class Sudoku:
     def reck(self, EmptyCells, placer, obj, Puzzle):
         index = placer
         for i in EmptyCells[index].possSol:
-            a = copy.deepcopy(Puzzle)
-            if(not obj.isSolved):
-                if not EmptyCells[index].inRow(EmptyCells[index].row, i, a, obj) and not EmptyCells[index].inCol(EmptyCells[index].col, i, a, obj) and not EmptyCells[index].inBox(EmptyCells[index].box, i, a, obj):
-                    a[EmptyCells[index].coord[0]][EmptyCells[index].coord[1]] = i
-                    if(self.finalCheck(a)):
+            if not obj.isSolved:
+                if not EmptyCells[index].inRow(EmptyCells[index].row, i, Puzzle, obj) and not EmptyCells[index].inCol(EmptyCells[index].col, i, Puzzle, obj) and not EmptyCells[index].inBox(EmptyCells[index].box, i, Puzzle, obj):
+                    Puzzle[EmptyCells[index].coord[0]][EmptyCells[index].coord[1]] = i
+                    if(self.finalCheck(Puzzle)):
                         obj.isSolved = True
-                        obj.solvedPuzzle = copy.deepcopy(a)
+                        obj.solvedPuzzle = Puzzle
                         return
                     elif(index < len(EmptyCells)-1 and not obj.isSolved):
-                        self.reck(EmptyCells,index+1,obj, a)
+                        self.reck(EmptyCells,index+1,obj, Puzzle)
+            if not obj.isSolved:
+                Puzzle[EmptyCells[index].coord[0]][EmptyCells[index].coord[1]] = 0
+            else:
+                return
         
 def main():
     test = Sudoku()
